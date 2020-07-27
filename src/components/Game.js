@@ -7,6 +7,7 @@ import useInterval          from '../hooks/useInterval'
 import useKeydown           from '../hooks/useKeydown'
 import useDocumentTitle     from '../hooks/useDocumentTitle'
 import usePersistedState    from '../hooks/usePersistedState'
+import useLocalStorage      from '../hooks/useLocalStorage'
 import {
   items, initialCookies,
   initialItems
@@ -16,13 +17,13 @@ export default () => {
   const [numCookies     , setNumCookies    ] = usePersistedState('num-cookies' , initialCookies)
   const [purchasedItems , setPurchasedItems] = useState(initialItems)
 
-  const incrementCookies = () => setNumCookies(numCookies + 1)
+  const incrementCookies = (amount) => setNumCookies(numCookies + amount)
 
   const handleAttemptedPurchase = ({ id, cost }) => {
     // 1. can u purchase?
     if (numCookies >= cost) {
       // 2.1 Yes => Deduct cookies.
-      setNumCookies(numCookies - cost)
+      incrementCookies(-cost)
       // 2.2 Yes => Increment item count in purchasedItems.
       setPurchasedItems(prevValue => {
         return { ...prevValue, [id]: prevValue[id] + 1 }
@@ -44,9 +45,11 @@ export default () => {
     return Object.keys(purchasedItems).reduce(reducer, 0)
   }
 
+  useLocalStorage('num-cookies', numCookies)
+
   useInterval(() => {
     const numOfGeneratedCookies = calculateCookiesPerSecond(purchasedItems)
-    setNumCookies(numCookies + numOfGeneratedCookies)
+    incrementCookies(numOfGeneratedCookies)
   }, 1000)
 
   useDocumentTitle(
@@ -63,7 +66,7 @@ export default () => {
           <Total>{numCookies} cookies</Total>
           <strong>{calculateCookiesPerSecond(purchasedItems)}</strong> cookies per second
         </Indicator>
-        <Button onClick={incrementCookies}>
+        <Button onClick={() => incrementCookies(1)}>
           <Cookie src={cookieSrc} />
         </Button>
       </GameArea>
