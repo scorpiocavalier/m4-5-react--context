@@ -1,76 +1,67 @@
-import React from "react";
-import styled from "styled-components";
-import { Link } from "react-router-dom";
+import React, { useState }  from "react"
+import { Link }             from "react-router-dom"
+import styled               from "styled-components"
+import Item                 from './Item'
+import cookieSrc            from "../cookie.svg"
+import useInterval          from '../hooks/useInterval'
+import useKeydown           from '../hooks/useKeydown'
+import useDocumentTitle     from '../hooks/useDocumentTitle'
+import { items }            from '../data'
 
-import useInterval from "../hooks/use-interval.hook";
+export default () => {
 
-import cookieSrc from "../cookie.svg";
-import Item from "./Item";
+  const [numCookies, setNumCookies] = useState(1000)
 
-const items = [
-  { id: "cursor", name: "Cursor", cost: 10, value: 1 },
-  { id: "grandma", name: "Grandma", cost: 100, value: 10 },
-  { id: "farm", name: "Farm", cost: 1000, value: 80 },
-];
+  const [purchasedItems, setPurchasedItems] = useState({
+    cursor: 0, grandma: 0, farm: 0,
+  })
 
-const calculateCookiesPerSecond = (purchasedItems) => {
-  return Object.keys(purchasedItems).reduce((acc, itemId) => {
-    const numOwned = purchasedItems[itemId];
-    const item = items.find((item) => item.id === itemId);
-    const value = item.value;
+  const incrementCookies = () => setNumCookies(prevValue => prevValue + 1)
 
-    return acc + value * numOwned;
-  }, 0);
-};
+  const handleAttemptedPurchase = ({ id, cost }) => {
+    // 1. can u purchase?
+    if (numCookies >= cost) {
+      // 2.1 Yes => Deduct cookies.
+      setNumCookies(prevValue => prevValue - cost)
+      // 2.2 Yes => Increment item count in purchasedItems.
+      setPurchasedItems(prevValue => {
+        return { ...prevValue, [id]: prevValue[id] + 1 }
+      })
+    } else {
+      // 3. No => Return an error with window.alert
+      window.alert("Not enough cookies.")
+    }
+  }
 
-const Game = () => {
-  const [numCookies, setNumCookies] = React.useState(1000);
+  const calculateCookiesPerSecond = purchasedItems => {
+    const reducer = (acc, itemId) => {
+      const numOwned = purchasedItems[itemId]
+      const item = items.find(item => item.id === itemId)
+      const value = item.value
 
-  const [purchasedItems, setPurchasedItems] = React.useState({
-    cursor: 0,
-    grandma: 0,
-    farm: 0,
-  });
-
-  const incrementCookies = () => {
-    setNumCookies((c) => c + 1);
-  };
+      return acc + value * numOwned
+    }
+    return Object.keys(purchasedItems).reduce(reducer, 0)
+  }
 
   useInterval(() => {
-    const numOfGeneratedCookies = calculateCookiesPerSecond(purchasedItems);
+    const numOfGeneratedCookies = calculateCookiesPerSecond(purchasedItems)
+    setNumCookies(prevValue => prevValue + numOfGeneratedCookies)
+  }, 1000)
 
-    setNumCookies(numCookies + numOfGeneratedCookies);
-  }, 1000);
+  useDocumentTitle(
+    `${numCookies} cookies - Cookie Clicker`,
+    `Cookie Clicker`
+  )
 
-  React.useEffect(() => {
-    document.title = `${numCookies} cookies - Cookie Clicker Workshop`;
-
-    return () => {
-      document.title = "Cookie Clicker Workshop";
-    };
-  }, [numCookies]);
-
-  React.useEffect(() => {
-    const handleKeydown = (ev) => {
-      if (ev.code === "Space") {
-        incrementCookies();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeydown);
-    };
-  });
+  useKeydown("Space", incrementCookies)
 
   return (
     <Wrapper>
       <GameArea>
         <Indicator>
           <Total>{numCookies} cookies</Total>
-          <strong>{calculateCookiesPerSecond(purchasedItems)}</strong> cookies
-          per second
+          <strong>{calculateCookiesPerSecond(purchasedItems)}</strong> cookies per second
         </Indicator>
         <Button onClick={incrementCookies}>
           <Cookie src={cookieSrc} />
@@ -79,59 +70,43 @@ const Game = () => {
 
       <ItemArea>
         <SectionTitle>Items:</SectionTitle>
-        {items.map((item, index) => {
+        { items.map((item, index) => {
           return (
             <Item
               key={item.id}
-              index={index}
-              name={item.name}
-              cost={item.cost}
-              value={item.value}
-              numOwned={purchasedItems[item.id]}
-              handleAttemptedPurchase={() => {
-                if (numCookies < item.cost) {
-                  alert("Cannot afford item");
-                  return;
-                }
-
-                setNumCookies(numCookies - item.cost);
-                setPurchasedItems({
-                  ...purchasedItems,
-                  [item.id]: purchasedItems[item.id] + 1,
-                });
-              }}
+              item={item}
+              purchasedItems={purchasedItems}
+              handleAttemptedPurchase={() => handleAttemptedPurchase(item)}
+              isFirst={index === 0}
             />
-          );
+          )
         })}
       </ItemArea>
       <HomeLink to="/">Return home</HomeLink>
     </Wrapper>
-  );
-};
+  )
+}
 
 const Wrapper = styled.div`
   display: flex;
   height: 100vh;
-`;
+`
+
 const GameArea = styled.div`
   flex: 1;
   display: grid;
   place-items: center;
-`;
+`
+
 const Button = styled.button`
   border: none;
   background: transparent;
   cursor: pointer;
-  transform-origin: center center;
-
-  &:active {
-    transform: scale(0.9);
-  }
-`;
+`
 
 const Cookie = styled.img`
   width: 200px;
-`;
+`
 
 const ItemArea = styled.div`
   height: 100%;
@@ -139,13 +114,13 @@ const ItemArea = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-`;
+`
 
 const SectionTitle = styled.h3`
   text-align: center;
   font-size: 32px;
   color: yellow;
-`;
+`
 
 const Indicator = styled.div`
   position: absolute;
@@ -155,18 +130,16 @@ const Indicator = styled.div`
   right: 0;
   margin: auto;
   text-align: center;
-`;
+`
 
 const Total = styled.h3`
   font-size: 28px;
   color: lime;
-`;
+`
 
 const HomeLink = styled(Link)`
   position: absolute;
   top: 15px;
   left: 15px;
   color: #666;
-`;
-
-export default Game;
+`

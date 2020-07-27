@@ -1,63 +1,62 @@
-import React from "react";
-import styled from "styled-components";
+import React, { useEffect, useRef } from 'react'
+import styled from 'styled-components'
 
-const Item = ({
-  index,
-  name,
-  cost,
-  value,
-  numOwned,
-  handleAttemptedPurchase,
-}) => {
-  const ref = React.useRef(null);
+export default ({ item: { id, name, cost, value }, purchasedItems, handleAttemptedPurchase, isFirst }) => {
+  const numOwned = Object.entries(purchasedItems).find(([ itemName ]) => itemName === id)[1]
+  const btnRef = useRef()
 
-  React.useEffect(() => {
-    if (index === 0) {
-      ref.current.focus();
-    }
-  }, [index]);
+  useEffect(() => {
+    if (isFirst)
+      btnRef.current.focus()
+  }, [isFirst])
 
-  return (
-    <Wrapper ref={ref} onClick={handleAttemptedPurchase}>
-      <Left>
-        <Name>{name}</Name>
-        <Info>
-          Cost: {cost} cookie(s). Produces {value} cookies/second.
-        </Info>
-      </Left>
-      <Right>{numOwned}</Right>
-    </Wrapper>
-  );
-};
+  return <ButtonWrapper onClick={handleAttemptedPurchase} ref={btnRef}>
+    <ItemWrapper>
+      <Name>{name}</Name>
+      <Specs>Cost: {cost} cookie(s). Produces {value} cookies/second.</Specs>
+    </ItemWrapper>
+    <CounterWrapper>
+      <Counter>{numOwned}</Counter>
+    </CounterWrapper>
+  </ButtonWrapper>
+}
 
-const Wrapper = styled.button`
-  width: 100%;
+const ButtonWrapper = styled.button`
   display: flex;
-  align-items: center;
-  background: transparent;
+  justify-content: space-between;
+  width: 450px;
+  padding: 10px 0;
   border: none;
-  border-bottom: 1px solid #444;
-  color: #fff;
+  border-bottom: 2px solid gray;
+  background: transparent;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  &:focus {
+    background: green;
+  }
+`
+
+const ItemWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
   text-align: left;
-  padding: 15px 0;
-`;
+`
 
-const Left = styled.div`
-  flex: 1;
-`;
+const CounterWrapper = styled(ItemWrapper)`
+  justify-content: center;
+  align-items: center;
+  width: 75px;
+`
 
-const Name = styled.h4`
-  font-size: 22px;
-`;
+const Name = styled.span`
+  font-size: 24px;
+`
 
-const Info = styled.div`
-  color: #ccc;
-  font-size: 15px;
-`;
+const Specs = styled.div`
+  padding: 5px 0 10px 0;
+`
 
-const Right = styled.div`
-  font-size: 32px;
-  padding: 0 20px;
-`;
-
-export default Item;
+const Counter = styled.div`
+  font-size: 30px;
+`
