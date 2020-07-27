@@ -1,7 +1,7 @@
 import React, { useState }  from "react"
 import { Link }             from "react-router-dom"
 import styled               from "styled-components"
-import Item                 from './Item'
+import Items                from './Items'
 import cookieSrc            from "../cookie.svg"
 import useInterval          from '../hooks/useInterval'
 import useKeydown           from '../hooks/useKeydown'
@@ -70,17 +70,7 @@ export default () => {
 
       <ItemArea>
         <SectionTitle>Items:</SectionTitle>
-        { items.map((item, index) => {
-          return (
-            <Item
-              key={item.id}
-              item={item}
-              purchasedItems={purchasedItems}
-              handleAttemptedPurchase={() => handleAttemptedPurchase(item)}
-              isFirst={index === 0}
-            />
-          )
-        })}
+        <Items purchasedItems={purchasedItems} handleAttemptedPurchase={handleAttemptedPurchase} />
       </ItemArea>
       <HomeLink to="/">Return home</HomeLink>
     </Wrapper>
