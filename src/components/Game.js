@@ -6,23 +6,23 @@ import cookieSrc            from "../cookie.svg"
 import useInterval          from '../hooks/useInterval'
 import useKeydown           from '../hooks/useKeydown'
 import useDocumentTitle     from '../hooks/useDocumentTitle'
-import { items }            from '../data'
+import usePersistedState    from '../hooks/usePersistedState'
+import {
+  items, initialCookies,
+  initialItems
+}                           from '../data'
 
 export default () => {
+  const [numCookies     , setNumCookies    ] = usePersistedState('num-cookies' , initialCookies)
+  const [purchasedItems , setPurchasedItems] = useState(initialItems)
 
-  const [numCookies, setNumCookies] = useState(1000)
-
-  const [purchasedItems, setPurchasedItems] = useState({
-    cursor: 0, grandma: 0, farm: 0,
-  })
-
-  const incrementCookies = () => setNumCookies(prevValue => prevValue + 1)
+  const incrementCookies = () => setNumCookies(numCookies + 1)
 
   const handleAttemptedPurchase = ({ id, cost }) => {
     // 1. can u purchase?
     if (numCookies >= cost) {
       // 2.1 Yes => Deduct cookies.
-      setNumCookies(prevValue => prevValue - cost)
+      setNumCookies(numCookies - cost)
       // 2.2 Yes => Increment item count in purchasedItems.
       setPurchasedItems(prevValue => {
         return { ...prevValue, [id]: prevValue[id] + 1 }
@@ -46,7 +46,7 @@ export default () => {
 
   useInterval(() => {
     const numOfGeneratedCookies = calculateCookiesPerSecond(purchasedItems)
-    setNumCookies(prevValue => prevValue + numOfGeneratedCookies)
+    setNumCookies(numCookies + numOfGeneratedCookies)
   }, 1000)
 
   useDocumentTitle(
