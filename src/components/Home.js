@@ -3,10 +3,12 @@ import { Link } from "react-router-dom"
 import styled from "styled-components"
 
 export default () => {
-  return <Wrapper>
-    <Title>Cookie game</Title>
-    <Link to="/game">Go to game</Link>
-  </Wrapper>
+  return (
+    <Wrapper>
+      <Title>Cookie game</Title>
+      <Link to="/game">Go to game</Link>
+    </Wrapper>
+  )
 }
 
 const Wrapper = styled.div`

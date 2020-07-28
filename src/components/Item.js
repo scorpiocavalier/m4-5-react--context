@@ -10,15 +10,17 @@ export default ({ item: { id, name, cost, value }, purchasedItems, handleAttempt
       btnRef.current.focus()
   }, [isFirst])
 
-  return <ButtonWrapper onClick={handleAttemptedPurchase} ref={btnRef}>
-    <ItemWrapper>
-      <Name>{name}</Name>
-      <Specs>Cost: {cost} cookie(s). Produces {value} cookies/second.</Specs>
-    </ItemWrapper>
-    <CounterWrapper>
-      <Counter>{numOwned}</Counter>
-    </CounterWrapper>
-  </ButtonWrapper>
+  return (
+    <ButtonWrapper onClick={handleAttemptedPurchase} ref={btnRef}>
+      <ItemWrapper>
+        <Name>{name}</Name>
+        <Specs>Cost: {cost} cookie(s). Produces {value} cookies/second.</Specs>
+      </ItemWrapper>
+      <CounterWrapper>
+        <Counter>{numOwned}</Counter>
+      </CounterWrapper>
+    </ButtonWrapper>
+  )
 }
 
 const ButtonWrapper = styled.button`
