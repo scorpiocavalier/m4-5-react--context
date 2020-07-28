@@ -1,15 +1,20 @@
-import React                from "react"
-import { Link }             from "react-router-dom"
-import styled               from "styled-components"
-import Items                from './Items'
-import cookieSrc            from "../cookie.svg"
-import useInterval          from '../hooks/useInterval'
-import useKeydown           from '../hooks/useKeydown'
-import useDocumentTitle     from '../hooks/useDocumentTitle'
-import useTimestamp         from '../hooks/useTimestamp'
+import React, { useContext }  from "react"
+import { GameContext }        from './GameContext'
+import { Link }               from "react-router-dom"
+import styled                 from "styled-components"
+import Items                  from './Items'
+import cookieSrc              from "../cookie.svg"
+import useInterval            from '../hooks/useInterval'
+import useKeydown             from '../hooks/useKeydown'
+import useDocumentTitle       from '../hooks/useDocumentTitle'
+import useTimestamp           from '../hooks/useTimestamp'
 
 export default () => {
-
+  const {
+    numCookies, purchasedItems, cookieRate, timestamp,
+    setCookieRate, setTimestamp,
+    incrementCookiesBy, handleAttemptedPurchase, calculateCookieRate
+  } = useContext(GameContext)
 
   useTimestamp(timestamp, cookieRate, incrementCookiesBy)
 
