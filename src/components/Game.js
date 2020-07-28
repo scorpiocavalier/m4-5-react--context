@@ -1,4 +1,4 @@
-import React, { useState }  from "react"
+import React                from "react"
 import { Link }             from "react-router-dom"
 import styled               from "styled-components"
 import Items                from './Items'
@@ -7,15 +7,14 @@ import useInterval          from '../hooks/useInterval'
 import useKeydown           from '../hooks/useKeydown'
 import useDocumentTitle     from '../hooks/useDocumentTitle'
 import usePersistedState    from '../hooks/usePersistedState'
-import useLocalStorage      from '../hooks/useLocalStorage'
 import {
   items, initialCookies,
   initialItems
 }                           from '../data'
 
 export default () => {
-  const [numCookies     , setNumCookies    ] = usePersistedState('num-cookies' , initialCookies)
-  const [purchasedItems , setPurchasedItems] = useState(initialItems)
+  const [numCookies     , setNumCookies   ] = usePersistedState('num-cookies' , initialCookies)
+  const [purchasedItems, setPurchasedItems] = usePersistedState('purchased-items', initialItems)
 
   const incrementCookies = (amount) => setNumCookies(numCookies + amount)
 
@@ -44,8 +43,6 @@ export default () => {
     }
     return Object.keys(purchasedItems).reduce(reducer, 0)
   }
-
-  useLocalStorage('num-cookies', numCookies)
 
   useInterval(() => {
     const numOfGeneratedCookies = calculateCookiesPerSecond(purchasedItems)
