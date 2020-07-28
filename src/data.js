@@ -4,5 +4,7 @@ export const items = [
   { id: "farm"    , name: "Farm"    , cost: 1000, value: 80 },
 ]
 
-export const initialCookies = 1000
-export const initialItems = { cursor: 0, grandma: 0, farm: 0 }
+export const initialTimestamp = Date.now()
+export const initialCookies   = 1000
+export const initialRate      = 0
+export const initialItems     = { cursor: 0, grandma: 0, farm: 0 }

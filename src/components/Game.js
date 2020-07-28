@@ -1,4 +1,4 @@
-import React                from "react"
+import React, { useEffect } from "react"
 import { Link }             from "react-router-dom"
 import styled               from "styled-components"
 import Items                from './Items'
@@ -7,22 +7,28 @@ import useInterval          from '../hooks/useInterval'
 import useKeydown           from '../hooks/useKeydown'
 import useDocumentTitle     from '../hooks/useDocumentTitle'
 import usePersistedState    from '../hooks/usePersistedState'
+import useTimestamp         from '../hooks/useTimestamp'
 import {
-  items, initialCookies,
+  items,
+  initialTimestamp,
+  initialCookies,
+  initialRate,
   initialItems
-}                           from '../data'
+} from '../data'
 
 export default () => {
-  const [numCookies     , setNumCookies   ] = usePersistedState('num-cookies' , initialCookies)
+  const [timestamp, setTimestamp] = usePersistedState('time-stamp', initialTimestamp)
+  const [numCookies, setNumCookies] = usePersistedState('num-cookies' , initialCookies)
+  const [cookieRate, setCookieRate] = usePersistedState('cookieRate', initialRate)
   const [purchasedItems, setPurchasedItems] = usePersistedState('purchased-items', initialItems)
 
-  const incrementCookies = (amount) => setNumCookies(numCookies + amount)
+  const incrementCookiesBy = (amount = 1) => setNumCookies(numCookies + amount)
 
   const handleAttemptedPurchase = ({ id, cost }) => {
     // 1. can u purchase?
     if (numCookies >= cost) {
       // 2.1 Yes => Deduct cookies.
-      incrementCookies(-cost)
+      incrementCookiesBy(-cost)
       // 2.2 Yes => Increment item count in purchasedItems.
       setPurchasedItems(prevValue => {
         return { ...prevValue, [id]: prevValue[id] + 1 }
@@ -44,26 +50,26 @@ export default () => {
     return Object.keys(purchasedItems).reduce(reducer, 0)
   }
 
+  useTimestamp(timestamp, cookieRate, incrementCookiesBy)
+
   useInterval(() => {
-    const numOfGeneratedCookies = calculateCookiesPerSecond(purchasedItems)
-    incrementCookies(numOfGeneratedCookies)
+    setTimestamp(Date.now())
+    setCookieRate(calculateCookiesPerSecond(purchasedItems))
+    incrementCookiesBy(cookieRate)
   }, 1000)
 
-  useDocumentTitle(
-    `${numCookies} cookies - Cookie Clicker`,
-    `Cookie Clicker`
-  )
+  useDocumentTitle(`${numCookies} cookies - Cookie Clicker`, `Cookie Clicker`)
 
-  useKeydown("Space", incrementCookies)
+  useKeydown("Space", incrementCookiesBy)
 
   return (
     <Wrapper>
       <GameArea>
         <Indicator>
           <Total>{numCookies} cookies</Total>
-          <strong>{calculateCookiesPerSecond(purchasedItems)}</strong> cookies per second
+          <strong>{cookieRate}</strong> cookies per second
         </Indicator>
-        <Button onClick={() => incrementCookies(1)}>
+        <Button onClick={() => incrementCookiesBy()}>
           <Cookie src={cookieSrc} />
         </Button>
       </GameArea>
